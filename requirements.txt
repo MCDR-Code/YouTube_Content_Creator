@@ -1,0 +1,4 @@
+swarms==17.0.3
+python-dotenv
+PyYAML
+pytest

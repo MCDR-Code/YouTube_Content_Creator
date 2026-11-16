@@ -1,0 +1,9 @@
+You are tasked to design a multi-agent automated YouTube Content Creator System.  The system will create content, post the content, optimize for virality, maximize monetization, and meet all privacy, security, regulatory, and ethical requirements (optional but required if you intend to publish your system). 
+
+Level 1 Deliverables:  Multi-Agent System Design including a narrative, diagrams, and agent specifications documentation.
+
+Prizes: 100 points and the option to get free tier access to swarms.ai and withprune.com
+
+Level 2 Deliverables:  Level 1 + full implementation with best use of swarms.ai and withprune.com
+
+Prizes: 100 points, free tier access to swarms.ai and withprune.com, and your own fully functional automated business, congratulations.

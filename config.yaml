@@ -1,0 +1,78 @@
+# YouTube Content Creator - main settings
+# mode: "mock" runs everything for free with a fake Prune server and a fake YouTube.
+#       "real" sends every model call through Prune with the keys in .env.
+mode: mock
+
+prune:
+  base_url: https://api.withprune.com/v1      # real Prune (OpenAI-compatible)
+  mock_base_url: http://127.0.0.1:8799/v1     # local fake Prune used in mock mode
+  weekly_run_budget_usd: 5.00                 # sent as X-Prune-Run-Budget-Usd for each weekly run
+
+youtube:
+  mode: mock                # mock = fake YouTube on disk; real = YouTube Data API (Prompt 14)
+  privacy_status: private   # fixed rule: every upload is private. The uploader refuses anything else.
+
+# One entry per agent. Each agent has its own Prune key (key_env names the .env line)
+# and its own daily spend cap, which we also set on that key in the Prune dashboard.
+# Model names need the "openai/" prefix so Swarms (LiteLLM) uses Prune's OpenAI-compatible route.
+agents:
+  director:
+    name: Channel Director
+    key_env: PRUNE_KEY_DIRECTOR
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.50
+    prompt: prompts/channel_director.md
+  trend_scout:
+    name: Trend Scout
+    key_env: PRUNE_KEY_TREND_SCOUT
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/trend_scout.md
+  audience_analyst:
+    name: Audience Analyst
+    key_env: PRUNE_KEY_AUDIENCE
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/audience_analyst.md
+  monetization_manager:
+    name: Monetization Manager
+    key_env: PRUNE_KEY_MONETIZATION
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/monetization_manager.md
+  scriptwriter:
+    name: Scriptwriter
+    key_env: PRUNE_KEY_SCRIPTWRITER
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 1.00
+    prompt: prompts/scriptwriter.md
+  fact_checker:
+    name: Fact-Checker
+    key_env: PRUNE_KEY_FACT_CHECKER
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.50
+    prompt: prompts/fact_checker.md
+  visual_designer:
+    name: Visual Designer
+    key_env: PRUNE_KEY_VISUAL
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/visual_designer.md
+  packaging_seo:
+    name: Packaging & SEO
+    key_env: PRUNE_KEY_PACKAGING
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/packaging_seo.md
+  shorts_producer:
+    name: Shorts Producer
+    key_env: PRUNE_KEY_SHORTS
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/shorts_producer.md
+  analytics_analyst:
+    name: Analytics Analyst
+    key_env: PRUNE_KEY_ANALYTICS
+    model: openai/gpt-4o-mini
+    daily_cap_usd: 0.25
+    prompt: prompts/analytics_analyst.md

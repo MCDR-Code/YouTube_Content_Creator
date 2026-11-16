@@ -1,0 +1,17 @@
+# Secrets
+.env
+client_secret*.json
+tokens/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated files
+output/
+logs/
+*.db
+*.sqlite
