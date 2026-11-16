@@ -55,3 +55,9 @@ def test_real_mode_rejects_non_prune_key(monkeypatch):
 
 def test_swarms_telemetry_is_off(settings):
     assert os.environ["SWARMS_TELEMETRY_ON"] == "false"
+
+
+def test_direct_openai_key_is_removed(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-should-not-be-used")
+    load_settings()
+    assert "OPENAI_API_KEY" not in os.environ

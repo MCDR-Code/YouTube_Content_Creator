@@ -27,8 +27,9 @@ def main() -> int:
     for a in s.agents.values():
         status = "set" if os.getenv(a.key_env, "").strip() else "empty"
         print(f"  {a.name:<22} {a.key_env:<24} key {status:<6} cap ${a.daily_cap_usd:.2f}/day  {a.model}")
-    if os.getenv("OPENAI_API_KEY"):
-        print("WARNING: OPENAI_API_KEY is set. Calls must go through Prune, so remove it from this shell.")
+    if ycc.REMOVED_PROVIDER_KEYS:
+        print("Note: " + ", ".join(ycc.REMOVED_PROVIDER_KEYS) + " found in your environment and ignored by this"
+              " program, so every call goes through Prune. Your Windows setting is unchanged.")
     if s.mode == "real" and s.missing_keys():
         print("Real mode needs these .env lines filled in: " + ", ".join(s.missing_keys()))
         return 1

@@ -58,6 +58,11 @@ def load_settings(config_path: Path | str | None = None, env_path: Path | str | 
     config_path = Path(config_path or PROJECT_ROOT / "config.yaml")
     load_dotenv(env_path or PROJECT_ROOT / ".env", override=False)
     os.environ["SWARMS_TELEMETRY_ON"] = "false"
+    # .env must not bring back a direct provider key either.
+    from ycc import DIRECT_PROVIDER_KEYS, REMOVED_PROVIDER_KEYS
+    for k in DIRECT_PROVIDER_KEYS:
+        if os.environ.pop(k, None) is not None and k not in REMOVED_PROVIDER_KEYS:
+            REMOVED_PROVIDER_KEYS.append(k)
 
     raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     mode = os.getenv("YCC_MODE", raw.get("mode", "mock")).strip().lower()
