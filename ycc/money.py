@@ -50,3 +50,17 @@ def weekly_money(stats: dict, prune_cost_by_agent: dict[str, float], other_costs
                         "affiliate_commission_usd": AFFILIATE_COMMISSION_USD},
         "partner_program": ypp,
     }
+
+
+def per_video(stats: dict, uploads: list[dict], cost_by_video: dict[str, float]) -> list[dict]:
+    """Views, estimated income, cost and profit per uploaded video (all estimates, code only)."""
+    shorts = [u for u in uploads if u["kind"] == "short"]
+    rows = []
+    for u in uploads:
+        views = stats["long_video_views"] if u["kind"] == "long" else (
+            stats["shorts_views"] // max(1, len(shorts)))
+        income = round(views * AFFILIATE_CLICK_RATE * AFFILIATE_CONVERSION * AFFILIATE_COMMISSION_USD, 2)
+        cost = round(cost_by_video.get(u["id"], 0.0), 6)
+        rows.append({"id": u["id"], "kind": u["kind"], "title": u["title"], "views": views,
+                     "income_usd": income, "cost_usd": cost, "profit_usd": round(income - cost, 4)})
+    return rows

@@ -226,7 +226,9 @@ def render_short(short: dict, out_dir: Path, n: int) -> dict:
     mp4, secs, cues = _segment(SHORT_SIZE, short["title"], [], narration, work, "short")
     final = out_dir / f"short_{n}.mp4"
     final.write_bytes(mp4.read_bytes())
-    return {"path": final, "seconds": round(secs, 1), "voice": sorted({c[3] for c in cues})}
+    poster = out_dir / f"short_{n}_poster.jpg"
+    Image.open(work / "short_00.png").convert("RGB").resize((360, 640)).save(poster, "JPEG", quality=85)
+    return {"path": final, "poster": poster, "seconds": round(secs, 1), "voice": sorted({c[3] for c in cues})}
 
 
 def chapter_lines(chapters: list[tuple]) -> str:

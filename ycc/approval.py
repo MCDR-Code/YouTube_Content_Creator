@@ -16,7 +16,8 @@ from pathlib import Path
 from ycc.storage import OUTPUT
 
 DB = OUTPUT / "ycc.db"
-STATUSES = ("pending", "approved", "rejected", "uploaded")
+STATUSES = ("pending", "changes_requested", "approved", "rejected", "uploaded")
+EXTRA_COLUMNS = {"poster": "TEXT", "cost_usd": "REAL", "changes_note": "TEXT"}
 
 
 class NotApproved(RuntimeError):
@@ -38,6 +39,10 @@ def _conn(db: Path | None = None) -> sqlite3.Connection:
     CREATE TABLE IF NOT EXISTS events (
         id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT, video_id TEXT, action TEXT, actor TEXT, detail TEXT);
     """)
+    have = {r[1] for r in c.execute("PRAGMA table_info(videos)").fetchall()}
+    for col, kind in EXTRA_COLUMNS.items():  # older databases from earlier runs
+        if col not in have:
+            c.execute(f"ALTER TABLE videos ADD COLUMN {col} {kind}")
     return c
 
 
@@ -47,16 +52,45 @@ def log_event(video_id: str, action: str, actor: str, detail: str = "", db: Path
                   (time.strftime("%Y-%m-%d %H:%M:%S"), video_id, action, actor, detail))
 
 
-def register_video(v: dict, db: Path | None = None) -> None:
+def register_video(v: dict, db: Path | None = None) -> bool:
+    """Add or replace a video as pending. An uploaded video is never replaced. Returns False if skipped."""
+    old = get(v["id"], db)
+    if old and old["status"] == "uploaded":
+        log_event(v["id"], "skipped_rebuild", "system", "already uploaded; kept as is", db)
+        return False
     with _conn(db) as c:
         c.execute("""INSERT OR REPLACE INTO videos (id, week, kind, path, thumbnails, variants, title, description,
-                     tags, ai_disclosure, made_for_kids, professor_spots, fact_check_passed, status)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'pending')""",
+                     tags, ai_disclosure, made_for_kids, professor_spots, fact_check_passed, status, poster, cost_usd)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'pending', ?, ?)""",
                   (v["id"], v["week"], v["kind"], v["path"], json.dumps(v.get("thumbnails", [])),
                    json.dumps(v.get("variants", [])), v["title"], v["description"], json.dumps(v.get("tags", [])),
                    int(v.get("ai_disclosure", True)), int(v.get("made_for_kids", False)),
-                   json.dumps(v.get("professor_spots", [])), int(v.get("fact_check_passed", True))))
-    log_event(v["id"], "registered", "system", "waiting for the professor", db)
+                   json.dumps(v.get("professor_spots", [])), int(v.get("fact_check_passed", True)),
+                   v.get("poster"), float(v.get("cost_usd") or 0)))
+    log_event(v["id"], "rebuilt" if old else "registered", "system", "waiting for the professor", db)
+    return True
+
+
+def list_all(db: Path | None = None) -> list[dict]:
+    with _conn(db) as c:
+        rows = c.execute("SELECT * FROM videos ORDER BY week DESC, kind, id").fetchall()
+    return [_row(r) for r in rows]
+
+
+def request_changes(video_id: str, approver: str, notes: str, db: Path | None = None) -> None:
+    """The professor asks for changes. The notes go to the Scriptwriter on the next revise step."""
+    notes = (notes or "").strip()
+    if not notes:
+        raise ValueError("Please write what should change.")
+    v = get(video_id, db)
+    if not v:
+        raise KeyError(video_id)
+    if v["status"] == "uploaded":
+        raise NotApproved("Already uploaded.")
+    with _conn(db) as c:
+        c.execute("UPDATE videos SET status='changes_requested', changes_note=?, approved_by=NULL, approved_at=NULL "
+                  "WHERE id=?", (notes[:2000], video_id))
+    log_event(video_id, "changes_requested", approver or "professor", notes[:300], db)
 
 
 def get(video_id: str, db: Path | None = None) -> dict | None:

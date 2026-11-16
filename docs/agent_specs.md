@@ -199,9 +199,9 @@ Plain-code parts (no language model)
 
 Video maker (ycc/media.py): draws slides and thumbnails with Pillow, makes the voice with offline text-to-speech (Windows voices), times the captions, and builds the MP4 files with ffmpeg. Checks: 3 thumbnail variants, 3 Shorts, chapters only when there are at least three, each 10 seconds or more apart.
 
-Review page (ycc/webapp.py): runs only on the professor's PC (127.0.0.1). Shows each video, the spots for his own examples, and the three thumbnails; lets him edit the title and description, add a note, and approve or reject. Checks: a secret token on every form, and his name is required to approve. It is the only place approvals are written.
+Web app (ycc/webapp.py, ycc/web_ui.py, ycc/jobs.py): the professor's app, with a Review queue, a page per video (player, script, fact-check results, title options, cost, and Approve, Request changes, Reject and Withdraw approval buttons), a Run page with a button for each weekly step, a Dashboard with charts, and Reports. Checks: login required for everything, a secret token on every form, lockout after 5 wrong passwords, one step running at a time. It is the only place approvals are written.
 
-Approval gate (ycc/approval.py): stores each video's status (pending, approved, rejected, uploaded) and a log of every action with the time and who did it. Checks: an approval can be withdrawn before upload but not after; an uploaded video cannot be approved again.
+Approval gate (ycc/approval.py): stores each video's status (pending, changes requested, approved, rejected, uploaded) and a log of every action with the time and who did it. Checks: an approval can be withdrawn before upload but not after; an uploaded video cannot be approved again.
 
 Uploader (ycc/uploader.py): re-reads the approval record right before each upload and refuses anything not approved. Checks: privacy is always private (there is no setting to change it), and the AI-disclosure and made-for-kids fields are always sent.
 

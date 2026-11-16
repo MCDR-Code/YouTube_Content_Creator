@@ -27,6 +27,8 @@ def main() -> int:
     for a in s.agents.values():
         status = "set" if os.getenv(a.key_env, "").strip() else "empty"
         print(f"  {a.name:<22} {a.key_env:<24} key {status:<6} cap ${a.daily_cap_usd:.2f}/day  {a.model}")
+    pw = os.getenv("YCC_ADMIN_PASSWORD", "")
+    print(f"Web login   {'set' if len(pw) >= 10 else 'NOT SET (add YCC_ADMIN_PASSWORD to .env, 10+ characters)'}")
     if ycc.REMOVED_PROVIDER_KEYS:
         print("Note: " + ", ".join(ycc.REMOVED_PROVIDER_KEYS) + " found in your environment and ignored by this"
               " program, so every call goes through Prune. Your Windows setting is unchanged.")

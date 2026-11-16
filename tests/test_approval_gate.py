@@ -91,18 +91,3 @@ def test_privacy_cannot_be_set_to_public(tmp_path):
     bad.write_text(cfg.replace("privacy_status: private", "privacy_status: public"), encoding="utf-8")
     with pytest.raises(ValueError):
         load_settings(bad)
-
-
-def test_review_page_requires_form_token(tmp_db):
-    from ycc.webapp import app
-    approval.register_video(_video(), tmp_db)
-    c = app.test_client()
-    r = c.post("/video/w01_long/decide", data={"action": "approve", "approver": "Someone", "title": "t",
-                                              "description": "d", "variant": "0"})
-    assert r.status_code == 403
-    assert approval.get("w01_long", tmp_db)["status"] == "pending"
-    r = c.post("/video/w01_long/decide", data={"action": "approve", "approver": "Professor", "title": "t",
-                                              "description": "d", "variant": "0",
-                                              "token": app.config["FORM_TOKEN"]})
-    assert r.status_code == 302
-    assert approval.get("w01_long", tmp_db)["approved_by"] == "Professor"

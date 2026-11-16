@@ -79,10 +79,12 @@ def plan_week(s: Settings, ctx: RunContext, inputs: dict, comments: list[str]) -
 
 
 # ---------------- Tuesday: script ----------------
-def write_script(s: Settings, ctx: RunContext, plan: schemas.WeeklyPlan) -> dict:
+def write_script(s: Settings, ctx: RunContext, plan: schemas.WeeklyPlan,
+                 professor_notes: list[str] | None = None) -> dict:
+    """professor_notes: changes the professor asked for on the review page (used by the revise step)."""
     ctx.phase = "script"
     rounds = []
-    fixes: list[dict] = []
+    fixes: list[dict] = [{"claim": "Professor's request", "problem": n, "fix": n} for n in (professor_notes or [])]
     script = check_result = None
     for rnd in range(1, MAX_SCRIPT_ROUNDS + 1):
         writer = make(s, "scriptwriter", ctx)
