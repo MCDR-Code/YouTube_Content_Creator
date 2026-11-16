@@ -29,6 +29,8 @@ if (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyCon
 . ".\.venv\Scripts\Activate.ps1"
 $env:YCC_HTTPS = "1"                  # secure cookies: the app is reached over https through Cloudflare
 $env:SWARMS_GLOBAL_LOGGER_ON = "false"
+$env:PYTHONUTF8 = "1"                 # UTF-8 output, so Swarms' emoji do not crash the app on Windows
+$env:PYTHONIOENCODING = "utf-8"
 New-Item -ItemType Directory -Force "logs" | Out-Null
 $tunLog = "logs\cloudflared.log"
 Remove-Item $tunLog, "logs\cloudflared.err.log" -ErrorAction SilentlyContinue
@@ -62,10 +64,20 @@ try {
     }
     if (-not $url) { throw "Cloudflare did not give a link. See logs\cloudflared.log" }
 
+    # Wait until Cloudflare has registered the tunnel, then give its new address a few
+    # seconds to go live. Opening the link too early shows "can't be reached".
+    Write-Host "Waiting for the link to go live..."
+    for ($i = 0; $i -lt 60; $i++) {
+        if (Select-String -Path $tunLog -Pattern 'Registered tunnel connection' -Quiet -ErrorAction SilentlyContinue) { break }
+        Start-Sleep -Milliseconds 500
+    }
+    Start-Sleep -Seconds 15
+
     # 5. Show and open the link
     Write-Host ""
     Write-Host "  Review app:  $url" -ForegroundColor Green
     Write-Host "  Sign in with the password from .env. The link changes every time you start."
+    Write-Host "  If the page says it can't be reached, wait 30 seconds and refresh."
     Write-Host "  Close this window (or press Ctrl+C) to stop the app and the tunnel."
     Write-Host ""
     Start-Process $url

@@ -20,3 +20,13 @@ DIRECT_PROVIDER_KEYS = (
 REMOVED_PROVIDER_KEYS = [k for k in DIRECT_PROVIDER_KEYS if os.environ.pop(k, None) is not None]
 
 __version__ = "0.1.0"
+
+# Windows: when the app's output goes to a log file, Python uses the old
+# cp1252 code page, and Swarms prints emoji that cp1252 cannot store, which
+# crashed the planning step. Force UTF-8 so any character can be printed.
+import sys as _sys
+for _stream in (_sys.stdout, _sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
