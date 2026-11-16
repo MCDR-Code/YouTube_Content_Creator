@@ -38,7 +38,7 @@ if ($remotes -notcontains "origin") { git remote add origin $Repo }
 git add -A
 $staged = git diff --cached --name-only
 if ($staged) {
-    git commit -m "Prompt 1: project setup (config, Prune key slots, telemetry off, tests)"
+    git commit -m "Project setup"
 }
 if (git ls-files .env) { throw ".env is tracked by git. Stop and tell me." }
 

@@ -46,6 +46,18 @@ Keeping costs under control
 
 Every model call goes through Prune, and each agent has its own key with its own daily spending limit, from 25 cents a day for the smaller jobs up to one dollar for the Scriptwriter. If an agent hits its limit, Prune blocks the call before it costs anything, and our code stops that agent cleanly and logs it. Each weekly run also has a total budget, and every call is labeled with the part of the week it belongs to, so the Prune dashboard shows exactly where the money went. Prune also checks viewer comments for tricks meant to take over an agent, and it sends back a signed receipt for each call, which we use as proof of our real run. We also turned off the Swarms framework's default habit of sending usage data, including the text of each run, to its own servers.
 
-What comes next
+Diagrams
 
-This narrative goes with the rest of the Level 1 design: the agent specifications, which describe each agent's job, inputs, outputs and budget in detail; the diagrams of the system and the weekly cycle; and the compliance document covering privacy, security, legal and ethical rules. After that comes the working system, first in mock mode and then with a real run through Prune.
+The diagrams folder has four pictures of the design, each as an SVG and a PNG. The system architecture (diagrams/1_architecture.png) shows the ten agents, Prune, the model provider, and the plain code around them. The weekly cycle (diagrams/2_weekly_cycle.png) shows the six parts of the week and the Swarms pattern for each. The model call path (diagrams/3_prune_call_path.png) follows one call from an agent through Prune's checks to the cost log, including what happens when a call is blocked. The approval gate (diagrams/4_approval_gate.png) shows how a video gets from pending to a private upload, and why no agent can reach that path.
+
+![System architecture](diagrams/1_architecture.png)
+
+![Weekly cycle](diagrams/2_weekly_cycle.png)
+
+![One model call through Prune](diagrams/3_prune_call_path.png)
+
+![Approval gate](diagrams/4_approval_gate.png)
+
+Where to find the rest
+
+This narrative goes with the rest of the Level 1 design: the agent specifications (agent_specs.md), which describe each agent's job, inputs, outputs, tools, handoffs, model and budget; the compliance document (compliance.md), covering privacy, security, legal and ethical rules; and each agent's full instructions in the prompts folder. The working system and how to run it are described in the README.
